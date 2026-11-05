@@ -21,3 +21,17 @@ Where this is set now:
 
 - Claude Code (`clyolo`): `~/.claude/system-prompts/sr-opus-5.md`
 - Codex: `~/.codex/AGENTS.md`
+
+## Tools
+
+### Archify
+
+[tt-a1i/archify](https://github.com/tt-a1i/archify) is an agent skill. It turns an idea, a plan, or a codebase into an interactive HTML diagram. It works with Claude Code, Codex, Cursor, and OpenCode.
+
+Install: tell the agent this.
+
+```text
+Install Archify for me by reading https://raw.githubusercontent.com/tt-a1i/archify/main/llms.txt
+```
+
+Use: ask for a diagram, for example "Use Archify to diagram this repo's request path."
