@@ -38,6 +38,20 @@ Give this to an agent that takes screenshots of a web UI for PRs, docs, or slide
 10. Open every image after you capture it and look at all four edges. Text that ends at an edge is cut off: capture it again.
 11. For a before and after pair, capture both from real running builds of each version, with the same data and the same viewport.
 
+## Demo videos of a browser flow
+
+Give this to an agent that drives a web UI with Playwright and must record a demo of it. Scripts: [`scripts/demo-video/`](scripts/demo-video/).
+
+1. Record with a CDP screencast, not Playwright's `recordVideo`. `recordVideo` works only in a new context, which loses the signed-in session. A screencast attaches to the tab that is already open: `node record.mjs http://localhost:9334 ./rec`.
+2. Keep every step of the flow in that one tab. A new tab is not recorded.
+3. Write down the local time when each step starts and ends. You need the times to fast-forward the waits.
+4. Stop the recorder with a file, not a signal: `touch ./rec/STOP`. The recorder can then end cleanly from another command.
+5. Build the video with `python3 build.py ./rec segments.json demo.mp4`. Give each segment a speed and a caption: 1x while the user and the agent act, 20x while a pod starts or a page loads. A 15-minute session becomes about 6 minutes.
+6. Put the captions in a subtitle track, not burned into the frames. Homebrew `ffmpeg` often has no `drawtext`. `build.py` adds a `mov_text` track that QuickTime shows, and it writes `captions.vtt` for a web page `<track>`.
+7. Take stills from the finished video with `ffmpeg -ss <seconds> -i demo.mp4 -frames:v 1 step-1.jpg`. Screencast frames show the whole tab. Playwright screenshots of a headed window with a set viewport can be cut off on the right.
+8. Look at a strip of the chat panel across the video before you share it. A panel that does not scroll to new messages hides the answer in the frames.
+9. Serve the video from a server that supports byte ranges. Without ranges, the video cannot seek, and Safari may not play it. Python's `http.server` does not support ranges.
+
 ## Tools
 
 ### Archify
