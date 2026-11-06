@@ -22,6 +22,22 @@ Where this is set now:
 - Claude Code (`clyolo`): `~/.claude/system-prompts/sr-opus-5.md`
 - Codex: `~/.codex/AGENTS.md`
 
+## Screenshots that are not cut off
+
+Give this to an agent that takes screenshots of a web UI for PRs, docs, or slides.
+
+1. Capture the element, not the viewport. Use `locator.screenshot()` in Playwright, or take a full-page screenshot and crop it to the element's `getBoundingClientRect()`.
+2. Scale the crop when the page has zoom or a device pixel ratio. Multiply each coordinate by `screenshotWidth / window.innerWidth`.
+3. Turn off motion before the capture. Inject `html { scroll-behavior: auto !important }`, and set `prefers-reduced-motion`. Wait for fonts and network idle.
+4. Hide or allow for sticky headers and floating widgets. They cover the top of the element.
+5. Add about 16 px of padding around the crop, so that borders and shadows stay in the image.
+6. Use one fixed viewport size and one device pixel ratio for every capture in a set, so that before and after images are the same size.
+7. Set an iframe's height to the content's `scrollHeight`. A fixed height cuts off the bottom of the content.
+8. In a page or slide, show one image per frame with `object-fit: contain`. Do not tile images or force a fixed height that crops them.
+9. Split a very tall capture into parts of about 1300 px for review. Do not shrink it until the text cannot be read.
+10. Open every image after you capture it and look at all four edges. Text that ends at an edge is cut off: capture it again.
+11. For a before and after pair, capture both from real running builds of each version, with the same data and the same viewport.
+
 ## Tools
 
 ### Archify
