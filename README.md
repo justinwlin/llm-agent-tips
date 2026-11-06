@@ -52,6 +52,56 @@ Give this to an agent that drives a web UI with Playwright and must record a dem
 8. Look at a strip of the chat panel across the video before you share it. A panel that does not scroll to new messages hides the answer in the frames.
 9. Serve the video from a server that supports byte ranges. Without ranges, the video cannot seek, and Safari may not play it. Python's `http.server` does not support ranges.
 
+## Code review: keep code simple
+
+Give this to an agent that writes or reviews code. Each rule comes from a finding that a reviewer made more than once.
+
+Remove what nothing uses:
+
+1. When you remove the last caller of a prop, field, or parameter, remove it too. Linters do not report a field that is only written in an object literal.
+2. Trace each analytics or log field from the place that sets it to the place that sends it. A field that the caller never passes is always empty, and a test that sets it by hand hides that.
+3. Remove a guard for a state that cannot occur. If the state can occur, handle it completely. A guard that returns early can stop a flow without an error.
+4. Remove a type cast such as `as never` or `as any`, then run the type check. Keep a cast only when the check fails, and then use the narrowest cast (`as unknown as Type`).
+
+Keep logic easy to read:
+
+5. Keep each function at a cognitive complexity of 15 or less. Move each branch into a named helper. Return early. Do not nest ternary operators.
+6. Replace a long `if` chain with a table of data: an array of `{ pattern, result }` and one loop.
+7. Put each repeated value (a duration, a URL, a tool name) in one named constant. Separate display text from lookup keys, and use one case style for all display text.
+8. Use the styling and animation system of the framework. Do not add a `<style>` tag in each component instance. Scope hover effects to a named group, so that the effect does not start from an unrelated parent.
+
+Do not lose or leak data:
+
+9. When you convert one shape into another (a proposal into a form, a request into a payload), check every field. Carry each field through, or block the action. Do not drop a field silently.
+10. Show only an allowlist of fields to users. Do not show raw tool output or prompts behind a "Details" button.
+11. Add a join key (an ID) to each analytics event, so that you can connect the event to the action that caused it.
+12. Use `https` in URL constants, also in placeholder URLs.
+
+Make the UI correct for all users:
+
+13. Do not show state only with a color or an icon. Add text, and use a visually hidden span when the text must not show.
+14. Mark decorative icons `aria-hidden`. When a button removes itself after a click, move focus to the element that shows the result.
+15. Guard each one-time action (approve, submit, switch) against a double click. Disable the control after the first click.
+16. Mark component props as read-only.
+
+Check the review before you change code:
+
+17. Prove the reviewer's premise with a test that fails before you fix anything. If the test passes on the old code, the premise is wrong: keep the test as a guard, and reply with the result.
+18. Write a test for each side effect (analytics, navigation, focus). Mock the module at its boundary and assert the call and its arguments.
+
+## Fixes in a stack of PRs
+
+Give this to an agent that applies review fixes to a stack of dependent PRs.
+
+1. Make each fix a separate commit at the top of the stack. Run the tests on each commit.
+2. Move each fix into the earliest PR after which no later commit changes the fix's files. If you move a fix to an older PR where the code is different, every later commit conflicts.
+3. Move the commits with `git rebase -i --update-refs <base>`. Set `GIT_SEQUENCE_EDITOR` to a script that moves each `pick` line above the `update-ref` line of its target branch.
+4. Before the rebase, write down every other ref that points into the stack (backups, experiments). `--update-refs` moves them too. Use a tag for a backup, not a branch.
+5. After the rebase, compare the old and new top: `git diff <old-top> HEAD` must be empty. Compare each branch with its remote to see which PRs changed.
+6. Run the type check and the tests on each changed PR head, not only on the top.
+7. Run the full test suite with no other test run in parallel. Under load, tests time out. Run each failed suite again alone before you report a failure.
+8. Push with `--force-with-lease=<branch>:<expected-sha>` for each branch. Then reply on each review thread with a link to the commit that fixed it.
+
 ## Tools
 
 ### Archify
